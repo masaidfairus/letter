@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <title>Graduation Letter</title>
+        <style>
+  @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Poppins:wght@400;600&display=swap');
+
+  /* Reset and base */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+    color: #222;
+    overflow-x: hidden;
+  }
+
+  /* Container for all page content */
+  #app {
+    position: relative;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Sparkle particles full screen background */
+  #sparkles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+  }
+
+  /* Big pink sparkling circles with gentle vertical drift and fade */
+  .sparkle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 8px 4px rgba(255,255,255,0.8);
+    filter: drop-shadow(0 0 3px rgba(255,192,203,0.6));
+    animation: sparkleDrift linear infinite;
+  }
+
+  @keyframes sparkleDrift {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-30px) scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  /* Main button */
+  button {
+    font-size: 1.25rem;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px;
+    background: #ff4d94;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255, 77, 148, 0.6);
+    transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.8s ease;
+    user-select: none;
+    min-width: 180px;
+    outline-offset: 3px;
+  }
+
+  button:focus-visible {
+    outline: 3px solid #ffe3f8;
+  }
+
+  button:hover:not(:disabled) {
+    background: #ff1a75;
+    transform: scale(1.05);
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  button:disabled {
+    background: #c488a0;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  button.fade-out {
+    opacity: 0;
+  }
+
+  /* Letter container */
+  #letterContainer {
+    max-width: 600px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 20px;
+    padding: 40px 30px;
+    margin-top: 30px;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 10px 40px rgba(255, 105, 180, 0.35);
+    font-family: 'Dancing Script', cursive;
+    color: #d72677;
+    text-align: center;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+  }
+
+  #letterContainer.show {
+    animation: openLetter 1.2s ease forwards;
+    pointer-events: auto;
+  }
+
+  #letterContainer h1 {
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  #letterContainer p {
+    font-size: 1.8rem;
+    line-height: 1.6;
+  }
+
+  /* Music control toggle */
+  #musicControl {
+    margin-top: 20px;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.5);
+  }
+
+  #musicControl:hover {
+    background-color: white;
+    color: #ff4d94;
+  }
+
+  /* Share button */
+  #shareBtn {
+    margin-top: 30px;
+    background: #fff3fb;
+    color: #d72677;
+    border: 2px solid #d72677;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    padding: 12px 30px;
+    border-radius: 40px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 0 10px #ff4d94aa;
+  }
+
+  #shareBtn:hover {
+    background-color: #d72677;
+    color: white;
+  }
+
+  /* Toast notification for share */
+  #toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #d72677;
+    color: white;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    padding: 14px 30px;
+    border-radius: 30px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 1000;
+  }
+
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Warning message styling */
+  .warning {
+    margin-top: 20px;
+    color: #ff1a75;
+    font-weight: 600;
+    font-size: 1.2rem;
+    animation: pulse 1.5s infinite;
+    text-align: center;
+    max-width: 320px;
+  }
+
+  @keyframes pulse {
+    0%   {opacity: 1;}
+    50%  {opacity: 0.6;}
+    100% {opacity: 1;}
+  }
+
+  /* Letter opening animation */
+  @keyframes openLetter {
+    0% {
+      opacity: 0;
+      transform: scale(0.4) rotateX(-90deg);
+      transform-origin: top center;
+      filter: brightness(0.8);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05) rotateX(15deg);
+      filter: brightness(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotateX(0deg);
+      filter: brightness(1);
+    }
+  }
+
+  /* Responsive styles */
+  @media (max-width: 480px) {
+    #letterContainer {
+      padding: 30px 20px;
+      font-size: 1rem;
+    }
+    #letterContainer h1 {
+      font-size: 2rem;
+    }
+    #letterContainer p {
+      font-size: 1.25rem;
+    }
+    button, #musicControl, #shareBtn {
+      width: 100%;
+      box-sizing: border-box;
+      min-width: auto;
+    }
+  }
+</style>
+    </head>
+    <body>
+        <div id="app">
+            <button id="openLetterBtn"
+                aria-label="Open the congratulatory letter">Open the
+                Letter</button>
+            <div class="warning" id="warningMessage" style="display:none;"
+                role="alert" aria-live="assertive"></div>
+
+            <section id="letterContainer" aria-live="polite" aria-hidden="true"
+                tabindex="-1">
+                <h1>Congratulations on your graduation!</h1>
+                <p>I am so proud of you. I wish you the best for your
+                    future.</p>
+                    <h1>Maaffin gw kalo alay wkwk</h1>
+                    <p>ga nyambung yah lagu sama temanya??, yaa gw cuman bisa ngasih hadiah ini, gw lagi bokek soalnya hehe,
+                      buat sendiri loh ini
+                    </p>
+            </section>
+
+            <button id="musicControl" style="display:none;" aria-pressed="true"
+                aria-label="Toggle background music">Pause Music</button>
+            <button id="shareBtn" style="display:none;"
+                aria-label="Share this moment">Share This Moment</button>
+
+            <div id="toast" role="alert" aria-live="assertive"
+                aria-atomic="true">Link copied to clipboard!</div>
+
+            <!-- Audio for background music -->
+            <audio id="congratsMusic" loop>
+                <!-- <source
+                    src="lagukeren"
+                    type="audio/ogg" /> -->
+                <source
+                    src="lagukeren.mp3"
+                    type="audio/mpeg" />
+                Your browser does not support the audio element.
+            </audio>
+
+            <audio id="congratsMusic2">
+              <!-- <source
+                  src="lagukeren"
+                  type="audio/ogg" /> -->
+              <source
+                  src="kids-cheering-sound-effect.mp3"
+                  type="audio/mpeg" />
+              Your browser does not support the audio element.
+          </audio>
+
+            <!-- Canvas for confetti -->
+            <canvas id="confettiCanvas"
+                style="position: fixed; top:0; left:0; pointer-events:none; z-index: 9999;"></canvas>
+
+            <!-- Sparkles container -->
+            <div id="sparkles"></div>
+        </div>
+
+        <script>
+  // Sparkle background generation
+  const sparklesContainer = document.getElementById('sparkles');
+  const sparkleCount = 30;
+  for (let i = 0; i < sparkleCount; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.classList.add('sparkle');
+    const size = 10 + Math.random() * 12;
+    sparkle.style.width = size + 'px';
+    sparkle.style.height = size + 'px';
+    sparkle.style.left = Math.random() * 100 + 'vw';
+    sparkle.style.top = Math.random() * 100 + 'vh';
+    sparkle.style.animationDuration = (6 + Math.random() * 8) + 's';
+    sparkle.style.animationDelay = (Math.random() * 8) + 's';
+    sparklesContainer.appendChild(sparkle);
+  }
+
+  // Confetti animation canvas setup
+  const confettiCanvas = document.getElementById('confettiCanvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let W = window.innerWidth;
+  let H = window.innerHeight;
+  confettiCanvas.width = W;
+  confettiCanvas.height = H;
+
+  let confettiParticles = [];
+
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  class ConfettiParticle {
+    constructor() {
+      this.x = Math.random() * W;
+      this.y = Math.random() * -H;
+      this.r = randomRange(7, 12);
+      this.d = (Math.random() * 20) + 10;
+      this.color = `hsl(330, 100%, ${randomRange(75, 90)}%)`; // pastel pink hues
+      this.tilt = randomRange(-10, 10);
+      this.tiltAngle = 0;
+      this.tiltAngleIncrement = randomRange(0.05, 0.1);
+      this.speed = randomRange(1, 3);
+    }
+    update() {
+      this.y += this.speed;
+      this.tiltAngle += this.tiltAngleIncrement;
+      this.tilt = Math.sin(this.tiltAngle) * 15;
+      if (this.y > H) {
+        this.y = -10;
+        this.x = Math.random() * W;
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.lineWidth = this.r/2;
+      ctx.strokeStyle = this.color;
+      ctx.moveTo(this.x + this.tilt + this.r/4, this.y);
+      ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.r / 2);
+      ctx.stroke();
+    }
+  }
+
+  // Initialize particles
+  function initConfetti() {
+    confettiParticles = [];
+    for (let i = 0; i < 150; i++) {
+      confettiParticles.push(new ConfettiParticle());
+    }
+  }
+
+  // Draw frame
+  let confettiRunning = false;
+  function drawConfetti() {
+    if (!confettiRunning) return;
+    ctx.clearRect(0, 0, W, H);
+    confettiParticles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(drawConfetti);
+  }
+
+  // Start confetti animation for a while
+  function startConfetti(duration = 7000) {
+    if(confettiRunning) return;
+    initConfetti();
+    confettiRunning = true;
+    confettiCanvas.style.display = 'block';
+    drawConfetti();
+    setTimeout(() => {
+      confettiRunning = false;
+      ctx.clearRect(0, 0, W, H);
+      confettiCanvas.style.display = 'none';
+    }, duration);
+  }
+
+  // Resize canvas on window resize
+  window.addEventListener('resize', () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    confettiCanvas.width = W;
+    confettiCanvas.height = H;
+  });
+
+  // Elements
+  const openBtn = document.getElementById('openLetterBtn');
+  const letter = document.getElementById('letterContainer');
+  const warningMessage = document.getElementById('warningMessage');
+  const audio = document.getElementById('congratsMusic');
+  const audio2 = document.getElementById('congratsMusic2');
+  const musicControl = document.getElementById('musicControl');
+  const shareBtn = document.getElementById('shareBtn');
+  const toast = document.getElementById('toast');
+
+  // Share button handler
+  shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Link copied to clipboard!');
+    }).catch(() => {
+      showToast('Failed to copy link');
+    });
+  });
+
+  // Toast helper
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2500);
+  }
+
+  // Music control toggle
+  let musicPlaying = true;
+  musicControl.onclick = () => {
+    if (musicPlaying) {
+      audio.pause();
+      musicControl.textContent = 'Play Music';
+      musicControl.setAttribute('aria-pressed', 'false');
+      musicPlaying = false;
+    } else {
+      audio.play();
+      musicControl.textContent = 'Pause Music';
+      musicControl.setAttribute('aria-pressed', 'true');
+      musicPlaying = true;
+    }
+  };
+
+  // Flag to prevent multiple transition handlers
+  let fadeOutHandled = false;
+
+  // Handle button fade out transitionend
+  openBtn.addEventListener('transitionend', (event) => {
+    if (event.propertyName === 'opacity' && fadeOutHandled === false && openBtn.classList.contains('fade-out')) {
+      fadeOutHandled = true; // only run once per fade out
+
+      // Hide button from view
+      openBtn.style.display = 'none';
+
+      // Trigger confetti celebration
+      startConfetti();
+
+      // Show letter with animation
+      letter.classList.add('show');
+      letter.setAttribute('aria-hidden', 'false');
+      letter.focus({preventScroll:true});
+
+      // Show music control and share button
+      musicControl.style.display = 'inline-block';
+      shareBtn.style.display = 'inline-block';
+
+      // Play music AFTER letter animation ends
+      letter.addEventListener('animationend', function handleAnimEnd(ev) {
+        if (ev.animationName === 'openLetter') {
+          audio2.play();
+          audio.play().catch(() => {});
+          musicPlaying = true;
+          musicControl.textContent = 'Pause Music';
+          musicControl.setAttribute('aria-pressed', 'true');
+          letter.removeEventListener('animationend', handleAnimEnd);
+        }
+      });
+    }
+  });
+
+  // Button click listener
+  openBtn.addEventListener('click', () => {
+    warningMessage.style.display = 'none';
+    const today = new Date();
+    const may29ThisYear = new Date(today.getFullYear(), 3, 29); // 4= May
+
+    if (today < may29ThisYear) {
+      warningMessage.textContent = 'You (Queen) can only open this on or after May 29th! ---------- Lu cuman boleh buka pas tanggal 29 atau lebih wlee 😂😜';
+      warningMessage.style.display = 'block';
+      letter.classList.remove('show');
+      letter.setAttribute('aria-hidden', 'true');
+      audio.pause();
+      audio.currentTime = 0;
+      musicControl.style.display = 'none';
+      shareBtn.style.display = 'none';
+    } else {
+      fadeOutHandled = false; // reset flag
+      openBtn.classList.add('fade-out');
+    }
+  });
+</script>
+    </body>
+</html>
